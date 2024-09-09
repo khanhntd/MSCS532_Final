@@ -1,4 +1,7 @@
 import networkx as nx
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+
 # pathExistBFS will use breath first search
 # https://www.geeksforgeeks.org/breadth-first-search-or-bfs-for-a-graph/#
 # to determine if the path between two vertexes are connected in the shortest way possible
@@ -38,6 +41,13 @@ if __name__ =="__main__":
     G.add_edge(1, nearestVertex)
 
   print("Graph egdes", G.edges())
-  print("Vertex 1's neighbor", nx.degree_centrality(G))
+  print("Degree Centrality", nx.degree_centrality(G))
 
   pathExistBFS(G, 1, 2)
+
+
+  # Show case of betweenness centrality
+  D = nx.barbell_graph(m1=5, m2=2)
+  print("Between centrality",nx.betweenness_centrality(D))
+  nx.draw(D)
+  plt.show()
