@@ -1,6 +1,7 @@
 import networkx as nx
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+from social_net import createSocialNet
 
 # pathExistBFS will use breath first search
 # https://www.geeksforgeeks.org/breadth-first-search-or-bfs-for-a-graph/#
@@ -32,22 +33,4 @@ def pathExistBFS(G: nx.DiGraph, startVertex: int, endVertex: int) -> bool:
 
 if __name__ =="__main__":
   # Initialize an empty graph with the corresponding vertex
-  G = nx.DiGraph()
-  G.add_nodes_from([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
-  print("Graph vertex ", G.nodes())
-
-  # Add the corresponding edge between vertex before calculating degree centrality
-  for nearestVertex in range(2, len(G.nodes()) + 1 ):
-    G.add_edge(1, nearestVertex)
-
-  print("Graph egdes", G.edges())
-  print("Degree Centrality", nx.degree_centrality(G))
-
-  pathExistBFS(G, 1, 2)
-
-
-  # Show case of betweenness centrality
-  D = nx.barbell_graph(m1=5, m2=2)
-  print("Between centrality",nx.betweenness_centrality(D))
-  nx.draw(D)
-  plt.show()
+  createSocialNet()
