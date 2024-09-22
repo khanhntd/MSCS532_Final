@@ -23,9 +23,10 @@ def createDirSaveFile(dirPath: Path, url: str) -> None:
         print('File Exists')
 
 def downloadDataset() -> list[str]:
+  github = 'https://assets.datacamp.com/production/repositories/580/datasets/69ada08d5cce7f35f38ffefe8f2291b7cfcd6000/github_users.p'
   twitter = 'https://assets.datacamp.com/production/repositories/580/datasets/64cf6963a7e8005e3771ef3b256812a5797320f0/ego-twitter.p'
   dataDir = Path('data/')
-  datasets = [twitter]
+  datasets = [twitter, github]
   dataPaths = list()
   for data in datasets:
       fileName = data.split('/')[-1].replace('?raw=true', '')

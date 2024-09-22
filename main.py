@@ -1,7 +1,7 @@
 import networkx as nx
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from social_net import createSocialNet
+from social_net import socialNetworkAnalysis
 
 # pathExistBFS will use breath first search
 # https://www.geeksforgeeks.org/breadth-first-search-or-bfs-for-a-graph/#
@@ -33,4 +33,4 @@ def pathExistBFS(G: nx.DiGraph, startVertex: int, endVertex: int) -> bool:
 
 if __name__ =="__main__":
   # Initialize an empty graph with the corresponding vertex
-  createSocialNet()
+  socialNetworkAnalysis()
