@@ -129,6 +129,7 @@ def createSocialNet() -> SocialNetwork:
   # sn.drawGraph()
   return sn
 
+
 def socialNetworkAnalysis() -> None:
   sn = createSocialNet()
   importantColaborators = sn.findImportantCollaborators()
