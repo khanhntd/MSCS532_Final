@@ -2,8 +2,6 @@
 import requests
 from pathlib import Path
 
-
-
 def createDirSaveFile(dirPath: Path, url: str) -> None:
     """
     Check if the path exists and create it if it does not.

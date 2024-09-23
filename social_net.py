@@ -35,7 +35,7 @@ class SocialNetwork:
   # they have. Afterwards, if there is a path or similar interest between them, we can
   # recommend the bottle neck's user to other followers/friends
   # to increase the reach
-  def connectCommunities(self):
+  def connectCommunities(self)-> None:
     cliques = sorted(nx.find_cliques(self.fbGraph), key=lambda x: len(x))
     largestClique = self.fbGraph.subgraph(set(cliques[-1])).copy()
     secondLargestClique = self.fbGraph.subgraph(set(cliques[-2])).copy()
@@ -43,15 +43,17 @@ class SocialNetwork:
     secondLargestCliqueBetweenessCentrality = nx.betweenness_centrality(secondLargestClique)
     largestCliqueBottleneckUser = max(largestCliqueBetweenessCentrality, key=largestCliqueBetweenessCentrality.get)
     secondLargestCliqueBottleneckUser = max(secondLargestCliqueBetweenessCentrality, key=secondLargestCliqueBetweenessCentrality.get)
+    print("Is path exist between two bottleneck users:", self.pathExistBFS(largestCliqueBottleneckUser, secondLargestCliqueBottleneckUser))
     if self.pathExistBFS(largestCliqueBottleneckUser, secondLargestCliqueBottleneckUser):
       print("Connect two largest clique together between {0} and {1}".format(largestCliqueBottleneckUser, secondLargestCliqueBottleneckUser))
 
   # findLargestCommunities can find the largest cliques
   # based on the shared interest
   # (e.g https://www.wired.com/story/facebook-people-you-may-know-friend-suggestions/ )
-  def findLargestCommunities(self):
+  def findLargestCommunities(self)-> None:
     largestClique = set(sorted(nx.find_cliques(self.fbGraph), key=lambda x: len(x))[-1])
     facebookLargestClique = self.fbGraph.subgraph(largestClique).copy()
+    print("Facebook largest clique", facebookLargestClique.nodes())
     # Go out 1 degree of separation
     for node in list(facebookLargestClique.nodes()):
         facebookLargestClique.add_nodes_from(self.fbGraph.neighbors(node))
@@ -125,7 +127,7 @@ def createSocialNet() -> SocialNetwork:
   print("Number of edges", len(fbSubGraph.edges()))
   print("Number of nodes", fbSubGraph.nodes())
   sn = SocialNetwork(fbSubGraph)
-  # sn.drawGraph()
+  #sn.drawGraph()
   return sn
 
 
