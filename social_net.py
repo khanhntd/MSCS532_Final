@@ -89,8 +89,8 @@ class SocialNetwork:
         # and determine if there is a path between them. If not,
         # add them
         for firstNeighborFriend, secondNeighborFriend  in combinations(self.fbGraph.neighbors(node), 2):
-            #if (firstNeighborFriend, secondNeighborFriend) not in self.traversePath:
-            if not self.pathExistBFS(firstNeighborFriend, secondNeighborFriend):
+            if (firstNeighborFriend, secondNeighborFriend) not in self.traversePath:
+            #if not self.pathExistBFS(firstNeighborFriend, secondNeighborFriend):
                 recommendedFriends[(firstNeighborFriend, secondNeighborFriend)] += 1
 
     # Identify the top 10 pairs of users
@@ -181,7 +181,7 @@ def createSocialNet() -> SocialNetwork:
   # and simulate a subgraph of fb
   fbNodeDegree = dict(fbGraph.degree())
   sortedNodes = sorted(fbNodeDegree.items(), key=lambda x: x[1], reverse=True)
-  topDegreeNodes = [node for node, _ in sortedNodes[:100]]
+  topDegreeNodes = [node for node, _ in sortedNodes[:10000]]
   fbSubGraph = fbGraph.subgraph(topDegreeNodes)
   print("Number of nodes", len(fbSubGraph.nodes()))
   print(fbSubGraph.nodes(0))
