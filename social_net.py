@@ -12,7 +12,7 @@ class SocialNetwork:
     self.fbGraph = fbGraph
     # To record all the traverse path for all the nodes
     # to determine if the current node has traverse all path before
-    self.traversePath = self.traversePathWithAllNodes()
+    #self.traversePath = self.traversePathWithAllNodes()
 
   def drawGraph(self, degreeDistribution: bool = False) -> None:
     plt.figure(figsize=(8, 8))
@@ -28,6 +28,9 @@ class SocialNetwork:
   # findImportantPeople will use degree centrality to determine the most important Facebook person
   # that have many friends or being followed by others facebook user
   def findImportantPeople(self) -> list[tuple]:
+    if len(self.fbGraph.nodes()) == 0:
+      return []
+
     degCent = nx.degree_centrality(self.fbGraph)
     degCent = {k: v for k, v in sorted(degCent.items(), key=lambda item: item[1], reverse=True)}
     maxDegCent = max(list(degCent.values()))
@@ -40,6 +43,9 @@ class SocialNetwork:
   # recommend the bottle neck's user to other followers/friends
   # to increase the reach
   def connectCommunities(self)-> int:
+    if len(self.fbGraph.nodes()) == 0:
+      return -1
+
     cliques = sorted(nx.find_cliques(self.fbGraph), key=lambda x: len(x))
     largestClique = self.fbGraph.subgraph(set(cliques[-1])).copy()
     secondLargestClique = self.fbGraph.subgraph(set(cliques[-2])).copy()
@@ -47,18 +53,21 @@ class SocialNetwork:
     secondLargestCliqueBetweenessCentrality = nx.betweenness_centrality(secondLargestClique)
     largestCliqueBottleneckUser = max(largestCliqueBetweenessCentrality, key=largestCliqueBetweenessCentrality.get)
     secondLargestCliqueBottleneckUser = max(secondLargestCliqueBetweenessCentrality, key=secondLargestCliqueBetweenessCentrality.get)
-    pathExist = self.pathExistBFS(largestCliqueBottleneckUser, secondLargestCliqueBottleneckUser)
-    #distanceBetweenTwoUsers = self.getDistanceWithCurrentNode(largestCliqueBottleneckUser, secondLargestCliqueBottleneckUser)
-    #print("Distance between two bottleneck users:", distanceBetweenTwoUsers)
+    #pathExist = (largestCliqueBottleneckUser, secondLargestCliqueBottleneckUser) in self.traversePath or (largestCliqueBottleneckUser, secondLargestCliqueBottleneckUser) in self.traversePath
+    distanceBetweenTwoUsers = self.getDistanceWithCurrentNode(largestCliqueBottleneckUser, secondLargestCliqueBottleneckUser)
+    print("Distance between two bottleneck users:", distanceBetweenTwoUsers)
     #print("There is path between the two largest clique", pathExist)
-    if pathExist:
+    if distanceBetweenTwoUsers:
       print("Connect two largest clique together between {0} and {1}".format(largestCliqueBottleneckUser, secondLargestCliqueBottleneckUser))
-    return 1
+    return distanceBetweenTwoUsers
 
   # findLargestCommunities can find the largest cliques
   # based on the shared interest
   # (e.g https://www.wired.com/story/facebook-people-you-may-know-friend-suggestions/ )
   def findLargestCommunities(self, isDrawing: bool = False)-> nx.Graph:
+    if len(self.fbGraph.nodes()) == 0:
+      return None
+
     largestClique = set(sorted(nx.find_cliques(self.fbGraph), key=lambda x: len(x))[-1])
     facebookLargestClique = self.fbGraph.subgraph(largestClique).copy()
     print("Facebook largest clique", facebookLargestClique.nodes())
@@ -81,7 +90,7 @@ class SocialNetwork:
       traversePath = set()
       for node, _ in self.fbGraph.nodes(data=True):
         for neighbour in self.fbGraph.neighbors(node):
-            if (node, neighbour) not in traversePath and self.pathExistBFS(node, neighbour):
+            if (node, neighbour) not in traversePath not in traversePath and self.pathExistBFS(node, neighbour):
                 traversePath.add((node, neighbour))
 
       return traversePath
@@ -178,7 +187,6 @@ class SocialNetwork:
 
     return -1
 
-@profile
 def createSocialNet() -> SocialNetwork:
   dataPath = downloadDataset()
   with open(dataPath[1], 'rb') as f:
@@ -198,15 +206,13 @@ def createSocialNet() -> SocialNetwork:
   sn = SocialNetwork(fbSubGraph)
   #sn.drawGraph()
   return sn
-
-
-
+@profile
 def socialNetworkAnalysis() -> None:
   sn = createSocialNet()
   #importantPeople = sn.findImportantPeople()
   #print("The most prolific people", importantPeople)
   #sn.drawGraph(degreeDistribution=True)
   #sn.findLargestCommunities()
-  #sn.connectCommunities()
-  recommendedFriends = sn.recommendedFriends()
-  print("Top 10 recommended friends:", recommendedFriends)
+  sn.connectCommunities()
+  #recommendedFriends = sn.recommendedFriends()
+  #print("Top 10 recommended friends:", recommendedFriends)

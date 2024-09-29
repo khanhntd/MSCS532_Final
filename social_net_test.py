@@ -14,21 +14,56 @@ def runTest(test):
     return result
 
 class TestSocialNetworkAnalysis(unittest.TestCase):
+  def test_StressTestingFrom1000To20000NodesForRecommendedFriendsWithUnsortedData(self):
+      dataset = downloadDataset()
+      with open(dataset[1], 'rb') as f:
+        fbGraph = pickle.load(f)
+      for numberOfNodes in range(1000, 20000, 1000):
+        nodes = [node for node in list(fbGraph.nodes())[:numberOfNodes]]
+        fbSubGraph = fbGraph.subgraph(nodes)
+        sn = SocialNetwork(fbSubGraph)
+        sn.recommendedFriends()
 
+  def test_StressTestingFrom1000To20000NodesForRecommendedFriendsWithSortedDegreeData(self):
+    dataset = downloadDataset()
+    with open(dataset[1], 'rb') as f:
+      fbGraph = pickle.load(f)
+    for numberOfNodes in range(1000, 20000, 1000):
+      nodes = [node for node in list(fbGraph.nodes())[:numberOfNodes]]
+      fbSubGraph = fbGraph.subgraph(nodes)
+      sn = SocialNetwork(fbSubGraph)
+      sn.recommendedFriends()
 
-  # def StressTestingFrom1000To20000NodesForRecommendedFriendsWithUnsortedData(self):
-  #   for numberOfNodes in range(1000, 20000, 1000):
-  #     nodes = [node for node, _ in fbSubGraph.nodes[:numberOfNodes]]
-  #     fbSubGraph = fbSubGraph.subgraph(nodes)
-  #     sn = SocialNetwork(fbSubGraph)
-  #     sn.recommendedFriends()
-  # def StressTestingFrom1000To20000NodesForRecommendedFriendsWithSortedDegreeData(self):
-  #   for numberOfNodes in range(0, 20000, 1000):
-  #     nodes = [node for node, _ in fbSubGraph.nodes[:numberOfNodes]]
-  #     fbSubGraph = fbSubGraph.subgraph(nodes)
-  #     sn = SocialNetwork(fbSubGraph)
-  #     sn.recommendedFriends()
-  
+  def test_StressTestingFrom1000To20000NodesForConnectingComunities(self):
+    dataset = downloadDataset()
+    with open(dataset[1], 'rb') as f:
+      fbGraph = pickle.load(f)
+    for numberOfNodes in range(1000, 20000, 1000):
+      nodes = [node for node in list(fbGraph.nodes())[:numberOfNodes]]
+      fbSubGraph = fbGraph.subgraph(nodes)
+      sn = SocialNetwork(fbSubGraph)
+      sn.connectCommunities()
+
+  def test_StressTestingFrom1000To20000NodesForFindingImportantPeople(self):
+    dataset = downloadDataset()
+    with open(dataset[1], 'rb') as f:
+      fbGraph = pickle.load(f)
+    for numberOfNodes in range(1000, 20000, 1000):
+      nodes = [node for node in list(fbGraph.nodes())[:numberOfNodes]]
+      fbSubGraph = fbGraph.subgraph(nodes)
+      sn = SocialNetwork(fbSubGraph)
+      sn.findImportantPeople()
+
+  def test_StressTestingFrom1000To20000NodesForFindingLargestCommunities(self):
+    dataset = downloadDataset()
+    with open(dataset[1], 'rb') as f:
+      fbGraph = pickle.load(f)
+    for numberOfNodes in range(1000, 20000, 1000):
+      nodes = [node for node in list(fbGraph.nodes())[:numberOfNodes]]
+      fbSubGraph = fbGraph.subgraph(nodes)
+      sn = SocialNetwork(fbSubGraph)
+      sn.findLargestCommunities()
+
   def test_FindRecommendedFriends(self):
     dataset = downloadDataset()
     with open(dataset[1], 'rb') as f:
@@ -51,6 +86,11 @@ class TestSocialNetworkAnalysis(unittest.TestCase):
     self.assertGreater(len(recommendedFriends), 0)
     self.assertEqual(expectedRecommendedFriends, recommendedFriends)
 
+  def test_FindRecommendedFriendsWithEmptyGraph(self):
+    fbGraph = nx.Graph()
+    sn = SocialNetwork(fbGraph)
+    self.assertEqual([], sn.recommendedFriends())
+
   def test_FindImportantPeople(self):
     dataset = downloadDataset()
     with open(dataset[1], 'rb') as f:
@@ -65,6 +105,12 @@ class TestSocialNetworkAnalysis(unittest.TestCase):
     maxDegCent = max(list(degCent.values()))
     expectedImportantPeople = [(n, dc) for n, dc in degCent.items() if dc == maxDegCent]
     self.assertEqual(expectedImportantPeople, importantPeople)
+
+  def test_FindImportantPeopleWithEmptyGraph(self):
+    fbGraph = nx.Graph()
+    sn = SocialNetwork(fbGraph)
+    importantPeople = sn.findImportantPeople()
+    self.assertEqual([], importantPeople)
 
   def test_ConnectCommunities(self):
     dataset = downloadDataset()
@@ -84,6 +130,11 @@ class TestSocialNetworkAnalysis(unittest.TestCase):
 
     self.assertEqual(expectedDistanceBetweenTwoUsers, sn.connectCommunities())
 
+  def test_ConnectCommunitiesWithEmptyGraph(self):
+    fbGraph = nx.Graph()
+    sn = SocialNetwork(fbGraph)
+    self.assertEqual(-1, sn.connectCommunities())
+
   def test_FindLargestCommunity(self):
     dataset = downloadDataset()
     with open(dataset[1], 'rb') as f:
@@ -101,6 +152,22 @@ class TestSocialNetworkAnalysis(unittest.TestCase):
     self.assertIsNotNone(expectedFacebookLargestClique)
     self.assertEqual(expectedFacebookLargestClique.nodes(), sn.findLargestCommunities().nodes())
 
+  def test_FindLargestCommunityWithEmptyGraph(self):
+    fbGraph = nx.Graph()
+    sn = SocialNetwork(fbGraph)
+    self.assertIsNone(sn.findLargestCommunities())
+
+  def test_ShortestPathBFS(self):
+    dataset = downloadDataset()
+    with open(dataset[1], 'rb') as f:
+      fbGraph = pickle.load(f)
+    nodes = [node for node in list(fbGraph.nodes())[:1000]]
+    fbSubGraph = fbGraph.subgraph(nodes)
+    sn = SocialNetwork(fbSubGraph)
+    for node, _ in fbSubGraph.nodes(data=True):
+      for neighbour  in fbSubGraph.neighbors(node):
+        self.assertEqual(fbSubGraph.has_edge(node, neighbour), sn.pathExistBFS(node, neighbour))
+
   def test_TraversePathWillAllNodes(self):
     dataset = downloadDataset()
     with open(dataset[1], 'rb') as f:
@@ -114,5 +181,42 @@ class TestSocialNetworkAnalysis(unittest.TestCase):
           self.assertTrue((node, neighbour) in sn.traversePath)
     self.assertGreater(len(sn.traversePath), 0)
 
+  def test_ShortestPathWithEmptyGraph(self):
+    fbGraph = nx.Graph()
+    sn = SocialNetwork(fbGraph)
+    for node, _ in fbGraph.nodes(data=True):
+      for neighbour  in fbGraph.neighbors(node):
+        if fbGraph.has_edge(node, neighbour):
+          self.assertTrue((node, neighbour) in sn.traversePath)
+    self.assertGreater(len(sn.traversePath), 0)
+
+def runTests(testCase: TestSocialNetworkAnalysis, testMethod: str):
+    suite = unittest.TestSuite()
+    suite.addTest(testCase(testMethod))
+    runner = unittest.TextTestRunner()
+    runner.run(suite)
+
 if __name__ == '__main__':
-    unittest.main()
+    stressTests = [
+        'test_StressTestingFrom1000To20000NodesForRecommendedFriendsWithUnsortedData'
+        'test_StressTestingFrom1000To20000NodesForRecommendedFriendsWithSortedDegreeData',
+        'test_StressTestingFrom1000To20000NodesForConnectingComunities',
+        'test_StressTestingFrom1000To20000NodesForFindingImportantPeople',
+        'test_StressTestingFrom1000To20000NodesForFindingLargestCommunities'
+    ]
+
+    unitTests = [
+        'test_FindRecommendedFriends',
+        'test_ShortestPathWithEmptyGraph',
+        'test_FindImportantPeople',
+        'test_ConnectCommunities',
+        'test_FindLargestCommunity',
+        'test_ShortestPathBFS',
+        'test_TraversePathWillAllNodes'
+    ]
+
+    with ThreadPoolExecutor() as executor:
+        # Execute only the specified tests in parallel
+        futures = [executor.submit(runTests, TestSocialNetworkAnalysis, test) for test in unitTests]
+        for future in futures:
+            future.result()
