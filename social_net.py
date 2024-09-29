@@ -5,6 +5,7 @@ from arcplot import *
 from collections import defaultdict
 from itertools import combinations
 from dataset import downloadDataset
+import heapq
 
 class SocialNetwork:
   def __init__(self, fbGraph: nx.Graph) -> None:
@@ -110,6 +111,46 @@ class SocialNetwork:
         if node == queue[-1]:
             return False
 
+  def pathExistDFS(self, startVertex: int, endVertex: int) -> bool:
+      visitedNodes = set()
+      return self.findPathBetweenTwoNodesDFS(self, startVertex, endVertex, visitedNodes)
+
+  def findPathBetweenTwoNodesDFS(self,currentVertex: int, endVertex: int, visitedNodes: set) -> bool:
+    if currentVertex == endVertex:
+      return True
+    visitedNodes.add(currentVertex)
+    for neighbour in self.fbGraph.neighbors(currentVertex):
+      if neighbour not in visitedNodes && self.findPathBetweenTwoNodesDFS(neighbour, endVertex, visitedNodes):
+        return True
+
+    return False
+
+  # getDistanceWithCurrentNode will use dijkstra's algortihm
+  # to get the shortest distance between two nodes
+  # Time complexity: O(V^2)
+  # Space complexity: O(v)
+  def getDistanceWithCurrentNode(self, startVertex: int, endVertex: int) -> int:
+    queue = [(0, startVertex)]
+    distances = {node: float('inf') for node in self.fbGraph.nodes()}
+    distances[startVertex] = 0
+    visitedNodes = set()
+
+    while queue:
+      currentDistance, currentNode = heapq.heappop(queue)
+      if currentNode in visitedNodes:
+        continue
+
+      if endVertex == currentNode:
+        return currentDistance
+
+      for neighbor in self.fbGraph.neighbors(currentNode):
+        if neighbor not in visitedNodes:
+          newDistance = currentDistance + 1
+          if newDistance < distances[neighbor]:
+            distances[neighbor] = newDistance
+            heapq.heappush(queue, (newDistance, neighbor))
+
+    return -1
 
 def createSocialNet() -> SocialNetwork:
   dataPath = downloadDataset()
@@ -124,6 +165,7 @@ def createSocialNet() -> SocialNetwork:
   topDegreeNodes = [node for node, _ in sortedNodes[:200]]
   fbSubGraph = fbGraph.subgraph(topDegreeNodes)
   print("Number of nodes", len(fbSubGraph.nodes()))
+  print(fbSubGraph.nodes(0))
   print("Number of edges", len(fbSubGraph.edges()))
   print("Number of nodes", fbSubGraph.nodes())
   sn = SocialNetwork(fbSubGraph)
