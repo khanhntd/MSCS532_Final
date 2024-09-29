@@ -15,7 +15,7 @@ pip install -U memory_profiler
 
 ## Output
 ### Profiler
-To run the sorting with corresponding profiler, we need to execute the the following commands:
+To run the sorting with corresponding profiler, we need to execute the following commands:
 - **Memory profiler:**
 ```
 python3 -m memory_profiler main.py

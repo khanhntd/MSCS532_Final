@@ -10,6 +10,9 @@ import heapq
 class SocialNetwork:
   def __init__(self, fbGraph: nx.Graph) -> None:
     self.fbGraph = fbGraph
+    # To record all the traverse path for all the nodes
+    # to determine if the current node has traverse all path before
+    self.traversePath = self.traversePathWithAllNodes()
 
   def drawGraph(self, degreeDistribution: bool = False) -> None:
     plt.figure(figsize=(8, 8))
@@ -67,6 +70,15 @@ class SocialNetwork:
     plt.show(block = False)
     plt.pause(5)
 
+  def traversePathWithAllNodes(self) -> set:
+      traversePath = set()
+      for node, _ in self.fbGraph.nodes(data=True):
+        for neighbour in self.fbGraph.neighbors(node):
+            if (node, neighbour) not in traversePath and self.pathExistDFS(node, neighbour):
+                traversePath.add((node, neighbour))
+
+      return traversePath
+
   # recommendedFriends will recommend friends who shared similar interest
   # but hasn't been friends yet by creating a combination between the current user's neighbor
   # If there is no connection, we will recommend them
@@ -77,6 +89,7 @@ class SocialNetwork:
         # and determine if there is a path between them. If not,
         # add them
         for firstNeighborFriend, secondNeighborFriend  in combinations(self.fbGraph.neighbors(node), 2):
+            #if (firstNeighborFriend, secondNeighborFriend) not in self.traversePath:
             if not self.pathExistBFS(firstNeighborFriend, secondNeighborFriend):
                 recommendedFriends[(firstNeighborFriend, secondNeighborFriend)] += 1
 
@@ -113,14 +126,20 @@ class SocialNetwork:
 
   def pathExistDFS(self, startVertex: int, endVertex: int) -> bool:
       visitedNodes = set()
-      return self.findPathBetweenTwoNodesDFS(self, startVertex, endVertex, visitedNodes)
+      return self.findPathBetweenTwoNodesDFS(startVertex, endVertex, visitedNodes)
 
-  def findPathBetweenTwoNodesDFS(self,currentVertex: int, endVertex: int, visitedNodes: set) -> bool:
+  # findPathBetweenTwoNodesDFS will use depth first search
+  # https://www.geeksforgeeks.org/python-program-for-depth-first-search-or-dfs-for-a-graph/
+  # Step 1: Begins with a node, traverses to the first neighbour of the current node
+  # Step 2: Once the current neighboard node read the depth of it, then their adjacent are traversed
+  # Time Complexity: O(v + e) (since its traverse through all vertex and edge in worst case)
+  def findPathBetweenTwoNodesDFS(self, currentVertex: int, endVertex: int, visitedNodes: set) -> bool:
     if currentVertex == endVertex:
       return True
+
     visitedNodes.add(currentVertex)
     for neighbour in self.fbGraph.neighbors(currentVertex):
-      if neighbour not in visitedNodes && self.findPathBetweenTwoNodesDFS(neighbour, endVertex, visitedNodes):
+      if neighbour not in visitedNodes and self.findPathBetweenTwoNodesDFS(neighbour, endVertex, visitedNodes):
         return True
 
     return False
@@ -162,7 +181,7 @@ def createSocialNet() -> SocialNetwork:
   # and simulate a subgraph of fb
   fbNodeDegree = dict(fbGraph.degree())
   sortedNodes = sorted(fbNodeDegree.items(), key=lambda x: x[1], reverse=True)
-  topDegreeNodes = [node for node, _ in sortedNodes[:200]]
+  topDegreeNodes = [node for node, _ in sortedNodes[:100]]
   fbSubGraph = fbGraph.subgraph(topDegreeNodes)
   print("Number of nodes", len(fbSubGraph.nodes()))
   print(fbSubGraph.nodes(0))
@@ -179,6 +198,6 @@ def socialNetworkAnalysis() -> None:
   print("The most prolific people", importantPeople)
   #sn.drawGraph(degreeDistribution=True)
   #sn.findLargestCommunities()
-  sn.connectCommunities()
+  #sn.connectCommunities()
   recommendedFriends = sn.recommendedFriends()
   print("Top 10 recommended friends:", recommendedFriends)
