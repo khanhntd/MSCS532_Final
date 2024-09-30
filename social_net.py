@@ -12,7 +12,7 @@ class SocialNetwork:
     self.fbGraph = fbGraph
     # To record all the traverse path for all the nodes
     # to determine if the current node has traverse all path before
-    #self.traversePath = self.traversePathWithAllNodes()
+    self.traversePath = self.traversePathWithAllNodes()
 
   def drawGraph(self, degreeDistribution: bool = False) -> None:
     plt.figure(figsize=(8, 8))
@@ -86,6 +86,9 @@ class SocialNetwork:
 
     return facebookLargestClique
 
+  # traversePathWithAllNodes will traverse to all the nodes and record the traverse path
+  # Time complexity: O(V^2 * (V+E))
+  # Space complexity: O(V*P)
   def traversePathWithAllNodes(self) -> set:
       traversePath = set()
       for node, _ in self.fbGraph.nodes(data=True):
@@ -197,22 +200,22 @@ def createSocialNet() -> SocialNetwork:
   # and simulate a subgraph of fb
   fbNodeDegree = dict(fbGraph.degree())
   sortedNodes = sorted(fbNodeDegree.items(), key=lambda x: x[1], reverse=True)
-  #topDegreeNodes = [node for node, _ in sortedNodes[:10000]]
-  topDegreeNodes = [node for node in list(fbGraph.nodes())[:10000]]
+  topDegreeNodes = [node for node, _ in sortedNodes[:10000]]
+  #topDegreeNodes = [node for node in list(fbGraph.nodes())[:10000]]
   fbSubGraph = fbGraph.subgraph(topDegreeNodes)
   print("Number of nodes", len(fbSubGraph.nodes()))
   print("Number of edges", len(fbSubGraph.edges()))
   print("Number of nodes", fbSubGraph.nodes())
   sn = SocialNetwork(fbSubGraph)
-  #sn.drawGraph()
+  sn.drawGraph()
   return sn
-@profile
+
 def socialNetworkAnalysis() -> None:
   sn = createSocialNet()
-  #importantPeople = sn.findImportantPeople()
-  #print("The most prolific people", importantPeople)
-  #sn.drawGraph(degreeDistribution=True)
-  #sn.findLargestCommunities()
+  importantPeople = sn.findImportantPeople()
+  print("The most prolific people", importantPeople)
+  sn.drawGraph(degreeDistribution=True)
+  sn.findLargestCommunities()
   sn.connectCommunities()
-  #recommendedFriends = sn.recommendedFriends()
-  #print("Top 10 recommended friends:", recommendedFriends)
+  recommendedFriends = sn.recommendedFriends()
+  print("Top 10 recommended friends:", recommendedFriends)
