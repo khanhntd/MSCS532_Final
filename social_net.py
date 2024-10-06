@@ -200,12 +200,11 @@ def createSocialNet() -> SocialNetwork:
   # and simulate a subgraph of fb
   fbNodeDegree = dict(fbGraph.degree())
   sortedNodes = sorted(fbNodeDegree.items(), key=lambda x: x[1], reverse=True)
-  topDegreeNodes = [node for node, _ in sortedNodes[:10000]]
+  topDegreeNodes = [node for node, _ in sortedNodes]
   #topDegreeNodes = [node for node in list(fbGraph.nodes())[:10000]]
   fbSubGraph = fbGraph.subgraph(topDegreeNodes)
   print("Number of nodes", len(fbSubGraph.nodes()))
   print("Number of edges", len(fbSubGraph.edges()))
-  print("Number of nodes", fbSubGraph.nodes())
   sn = SocialNetwork(fbSubGraph)
   sn.drawGraph()
   return sn
